@@ -61,7 +61,7 @@ class TimeBars(BaseBars):
 
         for row in data:
             # Set variables
-            date_time = row[0].timestamp()  # Convert to UTC timestamp
+            date_time = row[0]
             self.tick_num += 1
             price = np.float(row[1])
             volume = row[2]
@@ -69,7 +69,7 @@ class TimeBars(BaseBars):
             signed_tick = self._apply_tick_rule(price)
 
             timestamp_threshold = (int(
-                float(date_time)) // self.threshold + 1) * self.threshold  # Current tick boundary timestamp
+                float(date_time.timestamp())) // self.threshold + 1) * self.threshold  # Current tick boundary timestamp
 
             # Init current bar timestamp with first ticks boundary timestamp
             if self.timestamp is None:
@@ -77,9 +77,8 @@ class TimeBars(BaseBars):
             # Bar generation condition
             # Current ticks bar timestamp differs from current bars timestamp
             elif self.timestamp < timestamp_threshold:
-                self._create_bars(self.timestamp, self.close_price,
+                self._create_bars(date_time, price,
                                   self.high_price, self.low_price, list_bars)
-
                 # Reset cache
                 self._reset_cache()
                 self.timestamp = timestamp_threshold  # Current bar timestamp update
@@ -90,9 +89,6 @@ class TimeBars(BaseBars):
 
             # Update high low prices
             self.high_price, self.low_price = self._update_high_low(price)
-
-            # Update close price
-            self.close_price = price
 
             # Calculations
             self.cum_statistics['cum_ticks'] += 1
